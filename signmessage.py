@@ -25,7 +25,7 @@ generator_secp256k1 = ecdsa.ellipticcurve.Point( curve_secp256k1, _Gx, _Gy, _r )
 oid_secp256k1 = (1,3,132,0,10)
 SECP256k1 = ecdsa.curves.Curve("SECP256k1", curve_secp256k1, generator_secp256k1, oid_secp256k1 ) 
 
-addrtype = 0
+addrtype = 0L
 
 # from http://eli.thegreenplace.net/2009/03/07/computing-modular-square-roots-in-python/
 
