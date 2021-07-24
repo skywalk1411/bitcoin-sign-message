@@ -14,12 +14,12 @@ VERBOSE = False
 #VERBOSE = True
 
 # secp256k1, http://www.oid-info.com/get/1.3.132.0.10
-_p = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2FL
-_r = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141L
-_b = 0x0000000000000000000000000000000000000000000000000000000000000007L
-_a = 0x0000000000000000000000000000000000000000000000000000000000000000L
-_Gx = 0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798L
-_Gy = 0x483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8L
+_p = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F
+_r = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141
+_b = 0x0000000000000000000000000000000000000000000000000000000000000007
+_a = 0x0000000000000000000000000000000000000000000000000000000000000000
+_Gx = 0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798
+_Gy = 0x483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8
 curve_secp256k1 = ecdsa.ellipticcurve.CurveFp( _p, _a, _b )
 generator_secp256k1 = ecdsa.ellipticcurve.Point( curve_secp256k1, _Gx, _Gy, _r )
 oid_secp256k1 = (1,3,132,0,10)
@@ -96,7 +96,7 @@ def modular_sqrt(a, p):
     while True:
         t = b
         m = 0
-        for m in xrange(r):
+        for m in range(r):
             if t == 1:
                 break
             t = pow(t, 2, p)
@@ -129,7 +129,7 @@ def b58encode(v):
     """ encode v, which is a string of bytes, to base58.
     """
 
-    long_value = 0L
+    long_value = 0
     for (i, c) in enumerate(v[::-1]):
         long_value += (256**i) * ord(c)
 
@@ -151,7 +151,7 @@ def b58encode(v):
 
 def b58decode(v, length):
     """ decode v into a string of len bytes."""
-    long_value = 0L
+    long_value = 0
     for (i, c) in enumerate(v[::-1]):
         long_value += __b58chars.find(c) * (__b58base**i)
     
@@ -274,7 +274,7 @@ def sign_message_with_secret(secret, message, compressed=False):
     public_key = private_key.get_verifying_key()
     signature = private_key.sign_digest( Hash( msg_magic( message ) ), sigencode = ecdsa.util.sigencode_string )
     address = public_key_to_bc_address(encode_point(public_key, compressed))
-    if VERBOSE: print 'address:\n', address
+    if VERBOSE: print('address:\n', address)
     assert public_key.verify_digest( signature, Hash( msg_magic( message ) ), sigdecode = ecdsa.util.sigdecode_string)
     for i in range(4):
         nV = 27 + i
@@ -306,20 +306,20 @@ def sign_message_with_private_key(base58_priv_key, message, compressed=True):
     else:
         raise BaseException("error: private must start with 5 if uncompressed or L/K for compressed")
     
-    if VERBOSE: print 'secret_hex_string:\n', secret_hex_string
+    if VERBOSE: print('secret_hex_string:\n', secret_hex_string)
     secret = int(secret_hex_string, 16)
     
     checksum = Hash(encoded_priv_key_bytes[:-4])[:4].encode('hex')
-    if VERBOSE: print 'checksum:\n', checksum
+    if VERBOSE: print('checksum:\n', checksum)
     assert checksum == encoded_priv_key_hex_string[-8:] #make sure private key is valid
-    if VERBOSE: print 'secret:\n', secret
+    if VERBOSE: print('secret:\n', secret)
     return sign_message_with_secret(secret, message, compressed)
 
 
 def sign_and_verify(wifPrivateKey, message, bitcoinaddress, compressed=True):
     sig = sign_message_with_private_key(wifPrivateKey, message, compressed)
     assert verify_message(bitcoinaddress, sig, message)
-    if VERBOSE: print 'verify_message:', verify_message(bitcoinaddress, sig, message)
+    if VERBOSE: print('verify_message:', verify_message(bitcoinaddress, sig, message))
     return sig
 
 
@@ -329,22 +329,22 @@ def test_sign_messages():
     addressUncompressesed1 = '1HUBHMij46Hae75JPdWjeZ5Q7KaL7EFRSD'
     addressCompressesed1 = '14dD6ygPi5WXdwwBTt1FBZK3aD8uDem1FY'
     msg1 = 'test message'
-    print 'sig:\n', sign_and_verify(wif1, msg1, addressUncompressesed1, False) # good
-    print 'sig:\n', sign_and_verify(wif1, msg1, addressCompressesed1) # good
+    print('sig:\n', sign_and_verify(wif1, msg1, addressUncompressesed1, False)) # good
+    print('sig:\n', sign_and_verify(wif1, msg1, addressCompressesed1)) # good
     #print 'sig:\n', sign_and_verify(wif1, msg1, addressUncompressesed1) # bad
     #print 'sig:\n', sign_and_verify(wif1, msg1, addressCompressesed1, False) # bad
     
-    print 'sig:\n', sign_and_verify(compressedPrivKey1, msg1, addressCompressesed1) # good
-    print 'sig:\n', sign_and_verify(compressedPrivKey1, msg1, addressUncompressesed1, False) # good
+    print('sig:\n', sign_and_verify(compressedPrivKey1, msg1, addressCompressesed1)) # good
+    print('sig:\n', sign_and_verify(compressedPrivKey1, msg1, addressUncompressesed1, False)) # good
     #print 'sig:\n', sign_and_verify(compressedPrivKey1, msg1, addressUncompressesed1) # bad
     #print 'sig:\n', sign_and_verify(compressedPrivKey1, msg1, addressCompressesed1, False) # bad
 
 
 def sign_input_message():
-    print 'Sign message\n'
-    address = raw_input("Enter address:\n")
-    message = raw_input("Enter message:\n")
-    base58_priv_key = raw_input("Enter private key:\n")
+    print('Sign message\n')
+    address = input("Enter address:\n")
+    message = input("Enter message:\n")
+    base58_priv_key = input("Enter private key:\n")
 
     """
     address = '14dD6ygPi5WXdwwBTt1FBZK3aD8uDem1FY'
@@ -360,18 +360,18 @@ def sign_input_message():
     else:
         raise BaseException("error: private must start with 5 if uncompressed or L/K for compressed")
     
-    print '\n\n\n'
-    print address
-    print message
-    print base58_priv_key
-    print 'Signature:\n\n', sign_and_verify(base58_priv_key, message, address, compressed)
+    print('\n\n\n')
+    print(address)
+    print(message)
+    print(base58_priv_key)
+    print('Signature:\n\n', sign_and_verify(base58_priv_key, message, address, compressed))
 
 
 def verify_input_message():
-    print 'Verify message\n'
-    address = raw_input("Enter address:\n")
-    message = raw_input("Enter message:\n")
-    signature = raw_input("Enter signature:\n")
+    print('Verify message\n')
+    address = input("Enter address:\n")
+    message = input("Enter message:\n")
+    signature = input("Enter signature:\n")
 
     """
     address = '14dD6ygPi5WXdwwBTt1FBZK3aD8uDem1FY'
@@ -379,11 +379,11 @@ def verify_input_message():
     signature = 'IPn9bbEdNUp6+bneZqE2YJbq9Hv5aNILq9E5eZoMSF3/fBX4zjeIN6fpXfGSGPrZyKfHQ/c/kTSP+NIwmyTzMfk='
     #"""
     
-    print '\n\n\n'
-    print address
-    print message
-    print signature
-    print 'Message verified:', verify_message(address, signature, message)
+    print('\n\n\n')
+    print(address)
+    print(message)
+    print(signature)
+    print('Message verified:', verify_message(address, signature, message))
 
 def main():
     argv = sys.argv
